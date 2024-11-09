@@ -4,7 +4,7 @@
 
 > window.requestAnimationFrame() 方法会告诉浏览器你希望执行一个动画。它要求浏览器在下一次重绘之前，调用用户提供的回调函数。
 
-简而言之，这个方法会让动画表现得更丝滑。今天来做个小实验，看看它和js, css设置的动画的表现差异吧。
+简而言之，这个方法会让动画表现得更丝滑。今天来做个小实验，看看它和 js, css 设置的动画的表现差异吧。
 
 ## 1. 获取帧率/屏幕刷新率
 
@@ -107,8 +107,8 @@ function runC() {
 
 忽略误差造成的移动速度差距，对比看出，boxA（setInterval 方法）比 boxB（requestAnimationFrame 方法），boxC（animation CSS）有些许卡顿，后两者表现相差无几。
 
-可能 gif 表现不明显...下面有完整代码，拷贝到本地用浏览器打开即可。
+可能 gif 表现不明显--特别是在网站上看，下面有完整代码，拷贝到本地用浏览器打开即可。
 
-[完整代码](https://github.com/Yanko1013/funny/blob/main/requestAnimationFrame/index.html)
+[完整代码 GitHub](https://github.com/Yanko1013/funny/blob/main/requestAnimationFrame/index.html)
 
 See u! 感谢阅读
