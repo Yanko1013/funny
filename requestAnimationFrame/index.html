@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>requestAnimationFrame</title>
+
+    <style>
+        .a,
+        .b,
+        .c {
+            width: 200px;
+            height: 100px;
+            margin-top: 10px;
+            color: white;
+            font-size: 16px;
+            padding-left: 4px;
+        }
+
+        .a {
+            background: cadetblue;
+        }
+
+        .b {
+            background: sandybrown;
+        }
+
+        .c {
+            background: pink;
+        }
+
+        @keyframes moveRight {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(500px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="a">A-setInterval</div>
+    <div class="b">B-requestAnimationFrame</div>
+    <div class="c">C-animation(CSS)</div>
+
+    <script>
+        let FPS_VALUE = -1
+        const boxA = document.querySelector('.a')
+        const boxB = document.querySelector('.b')
+        const boxC = document.querySelector('.c')
+
+        const range = 500
+
+        function getRefreshRate(callback) {
+            let frames = 0;
+            let startTime = performance.now();
+
+            function tick() {
+                frames++;
+                const currentTime = performance.now();
+                const duration = currentTime - startTime;
+
+                if (duration >= 1000) {
+                    const fps = Math.floor(frames / duration * 1000);
+                    callback(fps);
+                } else {
+                    requestAnimationFrame(tick);
+                }
+            }
+
+            requestAnimationFrame(tick);
+        }
+
+        getRefreshRate((fps) => {
+            console.log(`refresh rate: ${fps} Hz`);
+            FPS_VALUE = fps;
+            runA();
+            runB();
+            runC();
+        });
+
+        function runA() {
+            let tX = 1
+            const timer = setInterval(() => {
+                boxA.style.transform = `translateX(${tX}px)`;
+                tX++;
+                if (tX === range + 1) {
+                    clearInterval(timer)
+                }
+            }, 1000 / FPS_VALUE)
+        }
+
+        function runB() {
+            let tX = 1
+
+            const animate = () => {
+                boxB.style.transform = `translateX(${tX}px)`;
+                tX++;
+                if (tX === range + 1) {
+                    return;
+                }
+                requestAnimationFrame(animate);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function runC() {
+            const time = (range / FPS_VALUE) + 's'
+            boxC.style.animation = `moveRight ${time} linear forwards`;
+        }
+    </script>
+</body>
+
+</html>
