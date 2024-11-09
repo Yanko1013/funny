@@ -50,7 +50,7 @@ getRefreshRate((fps) => {
 
 > 备注：这个计算帧率方法不绝对精确。
 
-### 2. 偏移动画
+## 2. 偏移动画
 
 设置三个元素，分别用 js-setInterval, js-requestAnimationFrame, css-animation 执行动画，对应代码：
 
