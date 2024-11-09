@@ -109,6 +109,6 @@ function runC() {
 
 可能 gif 表现不明显...下面有完整代码，拷贝到本地用浏览器打开即可。
 
-<!-- [完整代码]() -->
+[完整代码](https://github.com/Yanko1013/funny/blob/main/requestAnimationFrame/index.html)
 
 See u! 感谢阅读
