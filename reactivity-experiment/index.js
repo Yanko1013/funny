@@ -1,10 +1,3 @@
-/*
-set active
-theory.js:51 () => A0.value + A1.value 12
-theory.js:51 () => A0.value + A1.value 1
-index.js:13 13
-*/
-
 import { ref, computed } from './theory.js'
 
 const elementA0 = document.querySelector('#a0')
