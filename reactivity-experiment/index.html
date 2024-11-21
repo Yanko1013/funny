@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="yanko's funny experiment, welcome!">
+    <title>reactivity-experiment</title>
+
+    <style>
+      body {
+        padding-left: 20px;
+      }
+      div {
+        margin-top: 12px;
+      }
+      span {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+      }
+      input {
+        width: 60px;
+        height: 24px;
+        box-sizing: border-box;
+      }
+    </style>
+</head>
+<body>
+    <h1>
+        <a href="https://vuejs.org/guide/extras/reactivity-in-depth" target="_blank">参考</a>
+    </h1>
+
+    <div>
+      <span>A0:</span>
+      <input type="text" id="a0" value="1">
+    </div>
+    <div>
+      <span>A1:</span>
+      <input type="text" id="a1" value="1">
+    </div>
+    <div>
+      A2(A0+A1):
+      <span id="a2">2</span>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+</body>
+</html>
