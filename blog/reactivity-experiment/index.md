@@ -1,15 +1,23 @@
-/*
-  响应性核心
-  1. 变量被读取时，开启追踪
-  2. 追踪：若某 effect 有读取变量，设置该 effect 为订阅者
-  3. 变量被赋值，通知所有订阅者
-  ------
-  以下为简化版代码
-*/
+<!-- TODO -->
 
+# 模拟 vue3 响应性实验
+
+> 推荐阅读：[深入响应式系统](https://cn.vuejs.org/guide/extras/reactivity-in-depth)
+
+众所周知，响应式的核心原理是`数据劫持`、`依赖收集`、`派发更新`，本文将实现简化版的 ref、reactive。
+
+## 原理
+
+### 数据劫持
+
+### 依赖收集
+
+### 派发更新
+
+## 代码
+
+```js
 let activeEffect = null
-
-// WeakMap<target, Map<key, Set<effect>>>
 const GlobalSubMap = new WeakMap()
 
 export function computed(fn) {
@@ -24,7 +32,6 @@ export function computed(fn) {
 }
 
 function track(target, key) {
-  // 若当前正在进行 effect，需要将其加入订阅
   if (activeEffect) {
     if (!GlobalSubMap.has(target)) {
       const dep = new Map()
@@ -40,7 +47,6 @@ function track(target, key) {
 }
 
 function trigger(target, key) {
-  // 通知 target 的所有订阅者事情，自身已更改值
   if (GlobalSubMap.has(target)) {
     const effects = GlobalSubMap.get(target).get(key)
     effects.forEach((effect) => effect())
@@ -79,3 +85,4 @@ export function reactive(obj) {
     }
   })
 }
+```
