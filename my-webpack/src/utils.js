@@ -1,3 +1,11 @@
-export function sayHello(target) {
-  console.log(`Hello ${target}!`)
+class Hello {
+  constructor(target) {
+    this.target = target
+  }
+
+  sayHello() {
+    console.log(`Hello ${this.target}!`)
+  }
 }
+
+export default Hello

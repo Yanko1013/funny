@@ -1,3 +1,5 @@
-import { sayHello } from './utils.js';
+import Hello from './utils.js';
 
-sayHello("World");
+const hello = new Hello('World')
+
+hello.sayHello()

@@ -39,30 +39,42 @@ my-webpack/
 
 ## 输入输出
 
-建立个 `src/main.js` 作为入口，很学院派。依赖的话...再弄个 `src/utils.js` export 一个简单函数，那么我大概写成这样：
+建立个 `src/main.js` 作为入口，很学院派。依赖的话...再弄个 `src/utils.js` export 一个简单函数，那么我写成这样（经典 Hello World）：
 
 src/main.js:
 
 ```js
-import { sayHello } from './utils.js';
+import Hello from './utils.js';
 
-sayHello("World");
+const hello = new Hello('World')
+
+hello.sayHello()
 ```
 
 src/utils.js
 
 ```js
-export function sayHello(target) {
-  console.log(`Hello ${target}!`)
+class Hello {
+  constructor(target) {
+    this.target = target
+  }
+
+  sayHello(target) {
+    console.log(`Hello ${target}!`)
+  }
 }
+
+export default Hello
 ```
+
+这里我写了 Class，是突然想到可以搞点事，下文 Loader 拓展会提到 :D
 
 ## 依赖解析
 
 ## 模块打包
 
-## 拓展——Loader
+## 拓展：Loader
 
-## 拓展——Plugin
+## 拓展：Plugin
 
 ## 源码
