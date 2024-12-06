@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "just for test",
+  "main": "index.js",
+  "scripts": {
+    "build": ""
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "Yanko1013",
+  "license": "ISC"
+}
