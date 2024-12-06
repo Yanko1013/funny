@@ -4,7 +4,7 @@
   "description": "just for test",
   "main": "index.js",
   "scripts": {
-    "build": ""
+    "build": "node config.js"
   },
   "keywords": [
     "test"
