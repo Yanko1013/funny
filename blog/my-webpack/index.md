@@ -4,7 +4,7 @@
 
 先创个空文件夹，跑个 `npm init` 搞个仪式感..
 
-我的 package.json belike:
+我的初始 package.json belike:
 
 ```json
 {
@@ -13,7 +13,7 @@
   "description": "just for test",
   "main": "index.js",
   "scripts": {
-    "build": "node config.js"
+    "build": "node config.mjs"
   },
   "keywords": [
     "test"
@@ -25,66 +25,28 @@
 
 再创个 config.js 到目录，它和执行、配置相关，就准备开始啦。
 
-目录结构可以提前剧透下，大概是：
+初始目录结构大概是：
 
 ```text
 my-webpack/
 ├── src/
+│   ├── index.html
 │   ├── main.js
 │   └── utils.js
 ├── dist/
-├── config.js
+├── config.mjs
 └── package.json
 ```
 
+config.mjs 将作为打包的配置文件和程序入口，所以记得在 package.json 里写入 `"build": "node config.mjs"`。
+
+## 打包目的
+
 ## 输入输出
-
-建立个 `src/main.js` 作为入口，很学院派。依赖的话...再弄个 `src/utils.js` export 一个简单函数，那么我写成这样（经典 Hello World）：
-
-src/main.js:
-
-```js
-import Hello from './utils.js';
-
-const hello = new Hello('World')
-
-hello.sayHello()
-```
-
-src/utils.js
-
-```js
-class Hello {
-  constructor(target) {
-    this.target = target
-  }
-
-  sayHello(target) {
-    console.log(`Hello ${target}!`)
-  }
-}
-
-export default Hello
-```
-
-这里我写了 Class，是突然想到可以搞点事，下文 Loader 拓展会提到 :D
-
-输出的话，新建个 dist 目录就好。
 
 ## 依赖解析
 
-众所周知，打包需要启动服务端，为什么？因为要使用文件读写功能。
-
-文件读写，读和写什么？字符串！所以我在 `config.js` 先引入：
-
-```js
-```
-
 ## 模块打包
-
-## 未来计划
-
-试着做个拓展，加入 Loader 和 Plugin 功能，应该会在本月底（2024-12）实现且写篇博客？
 
 ## 源码
 
