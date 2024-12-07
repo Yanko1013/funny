@@ -4,7 +4,7 @@ class Hello {
   }
 
   sayHello() {
-    console.log(`Hello ${this.target}!`)
+    return `Hello ${this.target}!`
   }
 }
 

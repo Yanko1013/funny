@@ -1,5 +1,8 @@
-import Hello from './utils.js';
+import Hello from './utils.js'
 
-const hello = new Hello('World')
-
-hello.sayHello()
+export function runClick() {
+  const hello = new Hello('World')
+  document.querySelector('p').innerHTML =  hello.sayHello()
+}
+// 挂载 window
+window.runClick = runClick

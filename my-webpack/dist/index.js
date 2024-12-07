@@ -1,0 +1,1 @@
+class Hello {constructor(target) {this.target = target}sayHello() {return `Hello ${this.target}!`}}function runClick() {const hello = new Hello('World');document.querySelector('p').innerHTML =  hello.sayHello()}window.runClick = runClick

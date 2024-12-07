@@ -4,11 +4,15 @@
   "description": "just for test",
   "main": "index.js",
   "scripts": {
-    "build": "node config.js"
+    "build": "node config.mjs"
   },
   "keywords": [
     "test"
   ],
   "author": "Yanko1013",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "esprima": "^4.0.1",
+    "esquery": "^1.6.0"
+  }
 }
