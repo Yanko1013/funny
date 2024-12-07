@@ -1,0 +1,7 @@
+{
+  "baseDir": "./src",
+  "entryFile": "./src/main.js",
+  "outputPath": "./dist",
+  "htmlTemplateFile": "./src/index.html",
+  "bundleName": "index.js"
+}

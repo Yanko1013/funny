@@ -4,6 +4,8 @@ import esprima from 'esprima'
 import esquery from 'esquery'
 import { myHtmlWebpackPlugin } from './extension/plugin.mjs'
 import { tranCode } from './extension/loader.mjs'
+import customize from './customize.json' assert { type: 'json' }
+
 class MyWebpack {
   constructor(baseDir, entryFile, outputPath, htmlTemplateFile, bundleName) {
     this.baseDir = baseDir
@@ -119,12 +121,14 @@ class MyWebpack {
   async done() {}
 }
 
-// 自定义
-const baseDir = './src'
-const entryFile = './src/main.js'
-const outputPath = './dist'
-const htmlTemplateFile = './src/index.html'
-const bundleName = 'index.js'
+// 导入配置
+const {
+  baseDir,
+  entryFile,
+  outputPath,
+  htmlTemplateFile,
+  bundleName
+} = customize
 
 const myWebpack = new MyWebpack(baseDir, entryFile, outputPath, htmlTemplateFile, bundleName)
 
