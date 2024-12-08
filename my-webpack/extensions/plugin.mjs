@@ -10,9 +10,7 @@ export async function myHtmlWebpackPlugin(myWebpackInstance) {
 async function createHtml() {
   const originalHtml = fs.readFileSync(this.htmlTemplateFile, 'utf-8');
   const entryFileName = this.entryFile.split('/').at(-1)
-  
-  // todo: 正则
-  let handledHtml = originalHtml.replace(entryFileName, this.bundleName)
+  const handledHtml = originalHtml.replace(entryFileName, this.bundleName)
   const filePath = path.join(this.outputPath, 'index.html')
 
   fs.writeFile(filePath, handledHtml, 'utf8', (err) => {

@@ -2,8 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import esprima from 'esprima'
 import esquery from 'esquery'
-import { myHtmlWebpackPlugin } from './extension/plugin.mjs'
-import { tranCode } from './extension/loader.mjs'
+import { myHtmlWebpackPlugin } from './extensions/plugin.mjs'
+import { tranCode } from './extensions/loader.mjs'
 import customize from './customize.json' assert { type: 'json' }
 
 class MyWebpack {
@@ -14,8 +14,31 @@ class MyWebpack {
     this.htmlTemplateFile = htmlTemplateFile
     this.bundleName = bundleName
 
-    // 生命周期状态，未来会加入 Loader, Plugin
-    this.status = 'ready'
+    this.lifeCycle = this.initLifeCycle()
+  }
+
+  initLifeCycle() {
+    const target = {
+      status: 'pending',
+      timeRecord: new Map()
+    }
+    const handler = {
+      get(target, property) {
+        return target[property]
+      },
+      // 记下各阶段开启时间
+      set(target, property, value) {
+        const curTime = performance.now()
+        target.timeRecord.set(value, curTime)
+        target[property] = value
+        return true
+      }
+    }
+    return new Proxy(target, handler)
+  }
+
+  getCostTime() {
+    return Array.from(this.lifeCycle.timeRecord)
   }
 
   /**
@@ -31,29 +54,28 @@ class MyWebpack {
   async run() {
     try {
       // 第一步 解析依赖
-      this.status = 'beforeGetReference'
+      this.lifeCycle.status = 'beforeGetReference'
       const refMap = await this.getReference()
 
       // 第二步 扁平化依赖
-      this.status = 'beforeFlattenReference'
+      this.lifeCycle.status = 'beforeFlattenReference'
       const refString = await this.flattenReference(refMap)
 
       // 第三步 代码转换、压缩。应用 Loader
-      this.status = 'beforeTranCode'
+      this.lifeCycle.status = 'beforeTranCode'
       const codeString = await applyLoaders(refString)
 
       // 第四步 输出新 js
-      this.status = 'beforeOutputJs'
+      this.lifeCycle.status = 'beforeOutputJs'
       await this.outputJs(codeString)
 
       // 第五步 收尾，应用 plugin
-      this.status = 'beforeDone'
+      this.lifeCycle.status = 'beforeDone'
       await this.done()
 
-      this.status = 'done'
+      this.lifeCycle.status = 'done'
 
-    } catch(err) {
-      this.status = 'failed'
+    } catch (err) {
       console.error(err)
     }
   }
@@ -80,7 +102,7 @@ class MyWebpack {
     // 本层的 import
     const imports = importDeclarations.map(declaration => declaration.source.value);
     // 递归
-    for(let i=0;i<imports.length;i++) {
+    for (let i = 0; i < imports.length; i++) {
       const importPath = imports[i]
       const fullPath = path.join(baseDir, path.basename(importPath))
       const result = await this.getRefByArray(fullPath)
@@ -98,7 +120,7 @@ class MyWebpack {
     refArr = refArr.reverse()
 
     let result = ''
-    for(let i=0; i < refArr.length; i++) {
+    for (let i = 0; i < refArr.length; i++) {
       const code = fs.readFileSync(refArr[i], 'utf-8');
       result = result.concat('\n', code)
     }
@@ -112,13 +134,11 @@ class MyWebpack {
     fs.writeFile(filePath, codeString, 'utf8', (err) => {
       if (err) {
         console.error(err);
-      } else {
-        console.log('');
       }
     })
   }
 
-  async done() {}
+  async done() { }
 }
 
 // 导入配置
@@ -142,4 +162,6 @@ async function applyLoaders(codeString) {
 // 装载 plugin
 myHtmlWebpackPlugin(myWebpack)
 
-myWebpack.run()
+await myWebpack.run()
+
+console.log(myWebpack.getCostTime())
