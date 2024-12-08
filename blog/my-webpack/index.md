@@ -346,7 +346,7 @@ async function createHtml() {
 
 [GitHub_my-webpack](https://github.com/Yanko1013/funny/tree/main/my-webpack)
 
-或者看这个也许，我的配置文件 config.mjs：
+或者看这个也行，我的配置文件 config.mjs：
 
 ```js
 import fs from 'fs'
