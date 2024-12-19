@@ -8,7 +8,7 @@
 
 [cheerpj](https://cheerpj.com) 基于 WASM 在浏览器实现 JVM 功能，这意味着用户无需下载安装 java 环境即可在网页打开 java 应用（一般是 Java-GUI）。
 
-使用 Java8 实现广泛兼容性（小小吐槽一下，又双叒叕是 java8），并提供完整的运行时环境，使 Java 应用程序、Java-Applet、工具库以及 Java Web Start / JNLP 应用程序能够在浏览器中运行，而无需插件。
+使用 Java8 实现广泛兼容性（小小吐槽一下，又双叒叕是 java8，不过官网提到的未来计划会加入支持 java11），并提供完整的运行时环境，使 Java 应用程序、Java-Applet、工具库以及 Java Web Start / JNLP 应用程序能够在浏览器中运行，而无需插件。
 
 ## 用法 & demo
 
