@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <span id="mark1">mark1</span>
+  <br>
+  <br>
+  <br>
+  <span id="mark2" onclick="sayHello()">mark2</span>
+
+  <br>
+  <br>
+
+  <div>
+    <pre>
+      getEventListeners(object)
+    </pre>
+  </div>
+
+  <div>控制台稍微有个不同，双击</div>
+
+  <script>
+    const mark1 = document.querySelector('#mark1');
+    mark1.addEventListener('click', function() {
+      console.log('Mark 1 clicked');
+    });
+
+    mark1.addEventListener('mouseenter', function() {
+      console.log('Mouse entered Mark 1');
+    });
+
+    function sayHello() {
+      console.log('Hello');
+    }
+  </script>
+</body>
+</html>

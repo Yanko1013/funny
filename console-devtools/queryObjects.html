@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>永远不resolve/reject的Promise会导致内存泄漏吗</h1>
+
+  <a href="https://developer.chrome.com/docs/devtools/console/utilities?hl=zh-cn#queryObjects-function">queryObjects</a>
+  
+  <div>
+    <pre>
+      const registry = new FinalizationRegistry(() => {
+        console.log('garbage-collected!')
+      })
+
+      async function test(p) {
+        await p
+      }
+
+      for(let i=0; i< 1000;i++) {
+        const p1 = new Promise(() => {})
+        registry.register(p1)
+
+        const p2 = test(p1)
+
+        registry.register(p2)
+      }
+
+      queryObjects(Promise)
+    </pre>
+  </div>
+  <hr>
+  <div>
+    <pre>
+      new Promise(resolve => {
+        setTimeout(resolve, 5000)
+      })
+
+      queryObjects(Promise)
+    </pre>
+  </div>
+</body>
+</html>
