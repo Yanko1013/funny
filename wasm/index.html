@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <button onclick="testJs()">JavaScript</button>
+  <button onclick="testRustInWASM()">Web Assembly</button>
+  <script type="module">
+    import init, { fib_wasm, greet } from "./hello-wasm/pkg/hello_wasm.js"
+    await init();
+    // js 斐波那契函数
+    function fib_js(value) {
+      if (value <= 1) {
+        return value;
+      }
+      return fib_js(value - 1) + fib_js(value - 2);
+    }
+
+    const target = 35;
+
+    function testJs() {
+      console.time("js");
+      fib_js(target);
+      console.timeEnd("js")
+    }
+    
+    function testRustInWASM() {
+      console.time("wasm");
+      fib_wasm(target);
+      console.timeEnd("wasm");
+    }
+
+    window.testJs = testJs;
+    window.testRustInWASM = testRustInWASM;
+
+    // greet('WASM!!!!')
+  </script>
+</body>
+
+</html>
