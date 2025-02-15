@@ -2,3 +2,4 @@
 **/node_modules/
 ignore.**
 wasm/hello-wasm/target
+./emsdk

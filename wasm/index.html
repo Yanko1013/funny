@@ -14,6 +14,7 @@
     import init, { fib_wasm, greet } from "./hello-wasm/pkg/hello_wasm.js"
     await init();
     // js 斐波那契函数
+    // 1 1 2 3 5
     function fib_js(value) {
       if (value <= 1) {
         return value;
@@ -38,7 +39,14 @@
     window.testJs = testJs;
     window.testRustInWASM = testRustInWASM;
 
-    // greet('WASM!!!!')
+    greet('WASM!!!!')
+
+    // wasm - 写死
+    // dom js -> wasm -> js 
+    // dom js
+
+    // 性能优化，适用场景，计时
+    // swiper js转二进制
   </script>
 </body>
 
