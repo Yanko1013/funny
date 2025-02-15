@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Component</title>
+  <link rel="stylesheet" href="./swiper-bundle.css">
+  <style>
+    text-swiper {
+      display: block;
+      position: relative;
+      border-radius: 8px;
+      background: #0D3D69;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      overflow: hidden;
+    }
+    .container {
+      display: flex;
+    }
+    @media (min-width: 512px) {
+      .container div{
+        flex: 1;
+      }
+      .swiper-pagination {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <text-swiper>
+    <h2>Hello World!</h2>
+    <div class="container swiper-wrapper">
+      <div class="swiper-slide">
+        <h3>HTML</h3>
+        <p>Hypertext Markup Language</p>
+      </div>
+      <div class="swiper-slide">
+        <h3>CSS</h3>
+        <p>Cascading Style Sheets</p>
+      </div>
+      <div class="swiper-slide">
+        <h3>JS</h3>
+        <p>JavaScript</p>
+      </div>
+    </div>
+    <div class="swiper-pagination"></div>
+  </text-swiper>
+
+  <script src="./swiper-bundle.js" defer></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      class TextSwiper extends HTMLElement {
+        constructor() {
+          super();
+        }
+
+        connectedCallback() {
+          console.log('web-component');
+
+          if (window.innerWidth < 768) {
+            const swiper = new Swiper(this, {
+              slidesPerView: 1,
+              spaceBetween: 0,
+              loop: false,
+              centeredSlides: true,
+              pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+              },
+            });
+          }
+        }
+      }
+
+      if (!window.customElements.get('text-swiper')) {
+        window.customElements.define('text-swiper', TextSwiper);
+      }
+    });
+  </script>
+</body>
+</html>
