@@ -11,13 +11,13 @@ const THEME = {
   bg: "#000509", 
   keyBase: "#111111", 
 
-  // 激活时的键帽颜色 (亮青色)
-  keyActive: "#76b9b9", 
+  // [修改] 稍微加深一点激活时的键帽颜色，为了让白色文字对比度更高
+  keyActive: "#39a8a8", 
 
   keyTextBase: "#88CCCC", 
   
-  // 激活时的文字颜色 (黑色，配合亮青色键帽形成剪影效果)
-  keyTextActive: "#000509", 
+  // [修改] 激活时的文字改为纯白，防止被 Bloom 光晕吞没
+  keyTextActive: "#FFFFFF", 
 
   accentMagenta: "#FF00FF", 
   accentCyan: "#00FFFF", 
@@ -26,7 +26,6 @@ const THEME = {
 // --- 1. 单个按键组件 ---
 const Key3D = ({ label, width = 1, x, z, active }) => {
   const meshRef = useRef();
-  // 目标位置：按下时下沉到 -0.15
   const targetY = active ? -0.15 : 0;
 
   useFrame(() => {
@@ -41,7 +40,8 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
         <meshPhysicalMaterial
           color={active ? THEME.keyActive : THEME.keyBase}
           emissive={active ? THEME.keyActive : "#000000"}
-          emissiveIntensity={active ? 2 : 0}
+          // [微调] 稍微降低一点发光强度，避免光太强把字吃掉了
+          emissiveIntensity={active ? 1.5 : 0}
           roughness={0.15}
           metalness={0.9}
           reflectivity={1}
@@ -49,29 +49,21 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
         />
       </RoundedBox>
 
-      {/* 修改重点 2：修正文字坐标
-          
-          计算逻辑：
-          - 键帽高度 0.8，中心在 0，顶部表面在 +0.4。
-          - 默认状态：键帽在 0，文字在 0.41 (浮在表面)。
-          - 激活状态：键帽下沉到 -0.15，顶部表面变为 (-0.15 + 0.4) = 0.25。
-          - 之前的错误值：-0.04 (导致文字陷进键帽里)。
-          - 修正后的值：0.26 (确保文字依然浮在键帽表面)。
-      */}
+      {/* [修改] 文字组件优化 */}
       <Text
-        position={[0, active ? 0.26 : 0.41, 0]} 
+        // [修改] 激活高度设为 0.27 (抬高一点点)，未激活 0.41
+        position={[0, active ? 0.27 : 0.41, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.3}
         font="/fonts/OPPOSans-Regular.ttf"
         color={active ? THEME.keyTextActive : THEME.keyTextBase}
         anchorX="center"
         anchorY="middle"
+        // [新增] 关键属性：关闭色调映射，让白色最亮；depthWrite 确保在最上层
+        material-toneMapped={false} 
       >
         {label}
       </Text>
-
-      {/* 修改重点 1：已经删除了底部的 mesh (正方形高亮提示) */}
-      
     </group>
   );
 };
@@ -220,6 +212,7 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
       />
 
       <EffectComposer disableNormalPass multisampling={4}>
+        {/* Bloom 设置 */}
         <Bloom
           luminanceThreshold={0.8}
           mipmapBlur
@@ -239,7 +232,7 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
   );
 };
 
-// --- 5. UI 面板组件 (保持不变) ---
+// --- 5. UI 面板组件 ---
 const UIOverlay = ({ mousePos, keyHistory, activeKeys }) => {
   return (
     <div style={{
