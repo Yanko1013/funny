@@ -10,20 +10,23 @@ import { Suspense } from 'react';
 const THEME = {
   bg: "#000509", 
   keyBase: "#111111", 
-  keyActive: "#008888", 
+  // [修改] 稍微提亮一点激活色，配合高强度发光
+  keyActive: "#00AAAA", 
   keyTextBase: "#88CCCC", 
   keyTextActive: "#FFFFFF", 
   accentMagenta: "#FF00FF", 
   accentCyan: "#00FFFF", 
-  // 新增鼠标材质颜色
   mouseBody: "#1A1A1A",
   mouseGrip: "#0A0A0A",
 };
 
-// --- 1. 单个按键组件 (保持上一个版本状态) ---
-const Key3D = ({ label, width = 1, x, z, active }) => {
+// --- 1. 单个按键组件 ---
+const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
   const meshRef = useRef();
   const targetY = active ? -0.15 : 0;
+  
+  // 计算Z轴长度
+  const zLength = 0.8 + (h - 1) * 1.1;
 
   useFrame(() => {
     if (meshRef.current) {
@@ -33,12 +36,13 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
 
   return (
     <group position={[x, 0, z]}>
-      <RoundedBox ref={meshRef} args={[width, 0.8, 0.8]} radius={0.15} smoothness={8}>
+      <RoundedBox ref={meshRef} args={[width, 0.8, zLength]} radius={0.15} smoothness={8}>
         <meshPhysicalMaterial
           color={active ? THEME.keyActive : THEME.keyBase}
           emissive={active ? THEME.keyActive : "#000000"}
-          emissiveIntensity={active ? 1.5 : 0}
-          roughness={0.3} // 稍微粗糙一点，像PBT材质
+          // [修复] 提高发光强度，确保深色也能亮起来
+          emissiveIntensity={active ? 3 : 0}
+          roughness={0.3} 
           metalness={0.8}
           reflectivity={0.5}
           clearcoat={0.2}
@@ -62,75 +66,79 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
 };
 
 // =====================================================================
-// --- [重大修改] 2. 全尺寸键盘布局生成器 ---
+// --- 2. 键盘布局生成器 (修复：找回了按键映射代码 c) ---
 // =====================================================================
 const KeyboardLayout = ({ activeKeys }) => {
-  // 使用字符串 'sp-X' 来表示空隙 (Space)，X 是空隙宽度
   const rows = [
     // Row 0
     [
-      { k: '`', w: 1 }, { k: '1', w: 1 }, { k: '2', w: 1 }, { k: '3', w: 1 }, { k: '4', w: 1 }, { k: '5', w: 1 }, { k: '6', w: 1 }, { k: '7', w: 1 }, { k: '8', w: 1 }, { k: '9', w: 1 }, { k: '0', w: 1 }, { k: '-', w: 1 }, { k: '=', w: 1 }, { k: 'BACKSPACE', w: 2 },
-      'sp-0.5', // 功能键区空隙
-      { k: 'INS', w: 1 }, { k: 'HOME', w: 1 }, { k: 'PGUP', w: 1 },
-      'sp-0.5', // 数字区空隙
-      { k: 'NUM', w: 1 }, { k: '/', w: 1 }, { k: '*', w: 1 }, { k: '-', w: 1 }
+      { k: '`', c: 'Backquote', w: 1 }, { k: '1', c: 'Digit1', w: 1 }, { k: '2', c: 'Digit2', w: 1 }, { k: '3', c: 'Digit3', w: 1 }, { k: '4', c: 'Digit4', w: 1 }, { k: '5', c: 'Digit5', w: 1 }, { k: '6', c: 'Digit6', w: 1 }, { k: '7', c: 'Digit7', w: 1 }, { k: '8', c: 'Digit8', w: 1 }, { k: '9', c: 'Digit9', w: 1 }, { k: '0', c: 'Digit0', w: 1 }, { k: '-', c: 'Minus', w: 1 }, { k: '=', c: 'Equal', w: 1 }, { k: 'BACK', c: 'Backspace', w: 2 },
+      'sp-0.5',
+      { k: 'INS', c: 'Insert', w: 1 }, { k: 'HOME', c: 'Home', w: 1 }, { k: 'PGUP', c: 'PageUp', w: 1 },
+      'sp-0.5',
+      { k: 'NUM', c: 'NumLock', w: 1 }, { k: '/', c: 'NumpadDivide', w: 1 }, { k: '*', c: 'NumpadMultiply', w: 1 }, { k: '-', c: 'NumpadSubtract', w: 1 }
     ],
     // Row 1
     [
-      { k: 'TAB', w: 1.5 }, { k: 'Q', w: 1 }, { k: 'W', w: 1 }, { k: 'E', w: 1 }, { k: 'R', w: 1 }, { k: 'T', w: 1 }, { k: 'Y', w: 1 }, { k: 'U', w: 1 }, { k: 'I', w: 1 }, { k: 'O', w: 1 }, { k: 'P', w: 1 }, { k: '[', w: 1 }, { k: ']', w: 1 }, { k: '\\', w: 1.5 },
+      { k: 'TAB', c: 'Tab', w: 1.5 }, { k: 'Q', c: 'KeyQ', w: 1 }, { k: 'W', c: 'KeyW', w: 1 }, { k: 'E', c: 'KeyE', w: 1 }, { k: 'R', c: 'KeyR', w: 1 }, { k: 'T', c: 'KeyT', w: 1 }, { k: 'Y', c: 'KeyY', w: 1 }, { k: 'U', c: 'KeyU', w: 1 }, { k: 'I', c: 'KeyI', w: 1 }, { k: 'O', c: 'KeyO', w: 1 }, { k: 'P', c: 'KeyP', w: 1 }, { k: '[', c: 'BracketLeft', w: 1 }, { k: ']', c: 'BracketRight', w: 1 }, { k: '\\', c: 'Backslash', w: 1.5 },
       'sp-0.5',
-      { k: 'DEL', w: 1 }, { k: 'END', w: 1 }, { k: 'PGDN', w: 1 },
+      { k: 'DEL', c: 'Delete', w: 1 }, { k: 'END', c: 'End', w: 1 }, { k: 'PGDN', c: 'PageDown', w: 1 },
       'sp-0.5',
-      { k: '7', w: 1 }, { k: '8', w: 1 }, { k: '9', w: 1 }, { k: '+', w: 1 } // 注：简化处理，不跨行
+      { k: '7', c: 'Numpad7', w: 1 }, { k: '8', c: 'Numpad8', w: 1 }, { k: '9', c: 'Numpad9', w: 1 }, 
+      // 跨两行的加号
+      { k: '+', c: 'NumpadAdd', w: 1, h: 2 } 
     ],
     // Row 2
     [
-      { k: 'CAPS', w: 1.8 }, { k: 'A', w: 1 }, { k: 'S', w: 1 }, { k: 'D', w: 1 }, { k: 'F', w: 1 }, { k: 'G', w: 1 }, { k: 'H', w: 1 }, { k: 'J', w: 1 }, { k: 'K', w: 1 }, { k: 'L', w: 1 }, { k: ';', w: 1 }, { k: "'", w: 1 }, { k: 'ENTER', w: 2.2 },
-      'sp-4.4', // 跳过功能键区下方
-      { k: '4', w: 1 }, { k: '5', w: 1 }, { k: '6', w: 1 }, { k: '+', w: 1 } // 简化的重复+号
+      { k: 'CAPS', c: 'CapsLock', w: 1.8 }, { k: 'A', c: 'KeyA', w: 1 }, { k: 'S', c: 'KeyS', w: 1 }, { k: 'D', c: 'KeyD', w: 1 }, { k: 'F', c: 'KeyF', w: 1 }, { k: 'G', c: 'KeyG', w: 1 }, { k: 'H', c: 'KeyH', w: 1 }, { k: 'J', c: 'KeyJ', w: 1 }, { k: 'K', c: 'KeyK', w: 1 }, { k: 'L', c: 'KeyL', w: 1 }, { k: ';', c: 'Semicolon', w: 1 }, { k: "'", c: 'Quote', w: 1 }, { k: 'ENTER', c: 'Enter', w: 2.2 },
+      'sp-4.4', 
+      { k: '4', c: 'Numpad4', w: 1 }, { k: '5', c: 'Numpad5', w: 1 }, { k: '6', c: 'Numpad6', w: 1 }
     ],
     // Row 3
     [
-      { k: 'SHIFT', w: 2.3 }, { k: 'Z', w: 1 }, { k: 'X', w: 1 }, { k: 'C', w: 1 }, { k: 'V', w: 1 }, { k: 'B', w: 1 }, { k: 'N', w: 1 }, { k: 'M', w: 1 }, { k: ',', w: 1 }, { k: '.', w: 1 }, { k: '/', w: 1 }, { k: 'SHIFT', w: 2.7 },
-      'sp-1.2',
-      { k: '↑', w: 1 },
-      'sp-2.2',
-      { k: '1', w: 1 }, { k: '2', w: 1 }, { k: '3', w: 1 }, { k: 'ENT', w: 1 } // 简化的数字区回车
+      { k: 'SHIFT', c: 'ShiftLeft', w: 2.3 }, { k: 'Z', c: 'KeyZ', w: 1 }, { k: 'X', c: 'KeyX', w: 1 }, { k: 'C', c: 'KeyC', w: 1 }, { k: 'V', c: 'KeyV', w: 1 }, { k: 'B', c: 'KeyB', w: 1 }, { k: 'N', c: 'KeyN', w: 1 }, { k: 'M', c: 'KeyM', w: 1 }, { k: ',', c: 'Comma', w: 1 }, { k: '.', c: 'Period', w: 1 }, { k: '/', c: 'Slash', w: 1 }, { k: 'SHIFT', c: 'ShiftRight', w: 2.7 },
+      'sp-1.75',
+      { k: '↑', c: 'ArrowUp', w: 1 },
+      'sp-1.70',
+      { k: '1', c: 'Numpad1', w: 1 }, { k: '2', c: 'Numpad2', w: 1 }, { k: '3', c: 'Numpad3', w: 1 }, 
+      // 跨两行的回车
+      { k: 'ENT', c: 'NumpadEnter', w: 1, h: 2 } 
     ],
     // Row 4
     [
-      { k: 'CTRL', w: 1.5 }, { k: 'WIN', w: 1 }, { k: 'ALT', w: 1.5 }, { k: 'SPACE', w: 6 }, { k: 'ALT', w: 1.5 }, { k: 'FN', w: 1 }, { k: 'MENU', w: 1 }, { k: 'CTRL', w: 1.5 },
-      'sp-0.5',
-      { k: '←', w: 1 }, { k: '↓', w: 1 }, { k: '→', w: 1 },
-      'sp-1.1',
-      { k: '0', w: 2.1 }, { k: '.', w: 1 }, { k: 'ENT', w: 1 }
+      { k: 'CTRL', c: 'ControlLeft', w: 1.5 }, { k: 'WIN', c: 'MetaLeft', w: 1 }, { k: 'ALT', c: 'AltLeft', w: 1.5 }, { k: 'SPACE', c: 'Space', w: 6 }, { k: 'ALT', c: 'AltRight', w: 1.5 }, { k: 'FN', c: 'ContextMenu', w: 1 }, { k: 'CTRL', c: 'ControlRight', w: 2 },
+      'sp-1.65',
+      { k: '←', c: 'ArrowLeft', w: 1 }, { k: '↓', c: 'ArrowDown', w: 1 }, { k: '→', c: 'ArrowRight', w: 1 },
+      'sp-0.6',
+      { k: '0', c: 'Numpad0', w: 2.1 }, { k: '.', c: 'NumpadDecimal', w: 1 }
     ]
   ];
 
   const keys = useMemo(() => {
     const keyElements = [];
-    let zOffset = 0;
-    // 计算整体宽度偏移，让主键盘大致居中
+    let zOffset = 1;
     const startXOffset = -11.5; 
 
     rows.forEach((row, rowIndex) => {
       let xOffset = startXOffset;
       row.forEach((item, colIndex) => {
-        // 如果是字符串，说明是空隙
         if (typeof item === 'string' && item.startsWith('sp-')) {
           const spaceWidth = parseFloat(item.split('-')[1]);
           xOffset += spaceWidth;
-        } 
-        // 否则是按键对象
-        else {
+        } else {
+          // 计算跨行中心偏移
+          const height = item.h || 1;
+          const zCenterAdjustment = (height - 1) * 1.1 / 2;
+
           keyElements.push({
             ...item,
             x: xOffset + item.w / 2,
-            z: zOffset,
-            // 使用更唯一的 ID 防止冲突
-            id: `r${rowIndex}-c${colIndex}-${item.k.replace(/[^a-zA-Z0-9]/g, '')}`
+            z: zOffset + zCenterAdjustment, 
+            id: `key-${rowIndex}-${colIndex}`,
+            // [关键] 必须包含 code 属性，否则无法匹配 activeKeys
+            code: item.c, 
+            h: height 
           });
-          // 按键本身宽度 + 键间距(0.1)
           xOffset += item.w + 0.1;
         }
       });
@@ -139,31 +147,29 @@ const KeyboardLayout = ({ activeKeys }) => {
     return keyElements;
   }, []);
 
-  // 辅助函数：处理特殊键名映射 (例如把 Numpad1 映射为 1)
-  const isActive = (keyLabel) => {
-    // 这里可以添加更复杂的映射逻辑，目前简单处理
-    // 比如数字小键盘的 '1' 和主键盘的 '1' 可能会被视为同一个
-    return activeKeys.has(keyLabel);
-  }
-
   return (
-    // 整体向左平移一点，因为键盘变宽了
     <group position={[-2, 0, -2]}>
       {keys.map((keyData) => (
-        <Key3D key={keyData.id} label={keyData.k} width={keyData.w} x={keyData.x} z={keyData.z} active={isActive(keyData.k)} />
+        <Key3D 
+            key={keyData.id} 
+            label={keyData.k} 
+            width={keyData.w}
+            h={keyData.h}
+            x={keyData.x} 
+            z={keyData.z} 
+            // 依赖 code 进行判断
+            active={activeKeys.has(keyData.code)} 
+        />
       ))}
     </group>
   );
 };
 
 
-// =====================================================================
-// --- [重大修改] 3. 写实鼠标 3D 组件 ---
-// =====================================================================
+// --- 3. 写实鼠标 (保持不变) ---
 const RealisticMouse = ({ mouseButtons, scrollDir }) => {
   const groupRef = useRef();
   const { camera, raycaster, pointer } = useThree();
-  // 提升交互平面的高度，让鼠标悬浮在键盘上方
   const floorPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.3), []);
   const intersectPoint = useMemo(() => new THREE.Vector3(), []);
 
@@ -173,140 +179,79 @@ const RealisticMouse = ({ mouseButtons, scrollDir }) => {
       raycaster.ray.intersectPlane(floorPlane, intersectPoint);
       if (groupRef.current.parent) groupRef.current.parent.worldToLocal(intersectPoint);
       
-      // 滞后跟随
       groupRef.current.position.lerp(intersectPoint, 0.15);
-      // 固定悬浮高度
       groupRef.current.position.y = 0.35; 
       
-      // 动态倾斜效果
-      const tiltX = pointer.y * 0.15; // 前后倾斜
-      const tiltZ = -pointer.x * 0.15; // 左右倾斜
+      const tiltX = pointer.y * 0.15; 
+      const tiltZ = -pointer.x * 0.15; 
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, tiltX, 0.1);
       groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, tiltZ, 0.1);
     }
   });
 
-  // --- 材质定义 ---
-  // 主体材质：磨砂黑，低反光
-  const bodyMaterial = new THREE.MeshPhysicalMaterial({
-    color: THEME.mouseBody,
-    roughness: 0.8,
-    metalness: 0.1,
-    clearcoat: 0,
-  });
-  // 侧裙/滚轮材质：深色橡胶感
-  const gripMaterial = new THREE.MeshStandardMaterial({
-    color: THEME.mouseGrip,
-    roughness: 0.9,
-    metalness: 0.0,
-  });
-  // 按键材质：稍微光滑一点
-  const buttonMaterialBase = new THREE.MeshPhysicalMaterial({
-    color: THEME.mouseBody,
-    roughness: 0.4,
-    metalness: 0.3,
-    clearcoat: 0.3,
-  });
+  const bodyMaterial = new THREE.MeshPhysicalMaterial({ color: THEME.mouseBody, roughness: 0.8, metalness: 0.1, clearcoat: 0 });
+  const gripMaterial = new THREE.MeshStandardMaterial({ color: THEME.mouseGrip, roughness: 0.9, metalness: 0.0 });
+  const buttonMaterialBase = new THREE.MeshPhysicalMaterial({ color: THEME.mouseBody, roughness: 0.4, metalness: 0.3, clearcoat: 0.3 });
 
   return (
-    // 初始位置放在数字区旁边
-    <group ref={groupRef} position={[8, 0, 2]} rotation={[0, -Math.PI/16, 0]}> {/*稍微旋转一点角度更自然*/}
-      
-      {/* === 1. 鼠标主体 (符合人体工学的造型) === */}
+    <group ref={groupRef} position={[8, 0, 2]} rotation={[0, -Math.PI/16, 0]}> 
       <group position={[0, 0, 0.2]}>
-        {/* 后部掌托：一个拉伸变形的球体，营造隆起感 */}
         <Sphere args={[1.1, 32, 32]} position={[0, 0.1, 0.8]} scale={[1, 0.8, 1.5]}>
             <primitive object={bodyMaterial} attach="material" />
         </Sphere>
-        
-        {/* 前部主体：连接按键和掌托 */}
         <RoundedBox args={[2, 0.8, 2]} radius={0.4} smoothness={8} position={[0, 0, -0.2]} scale={[1, 1, 1.2]}>
              <primitive object={bodyMaterial} attach="material" />
         </RoundedBox>
-
-        {/* 侧裙防滑细节 (可选) */}
         <RoundedBox args={[2.1, 0.2, 2.5]} radius={0.1} position={[0, -0.2, 0.5]}>
             <primitive object={gripMaterial} attach="material" />
         </RoundedBox>
       </group>
-
-      {/* === 2. 独立按键 (贴合主体曲线) === */}
-      {/* 左键 */}
       <group position={[-0.55, 0.45, -1.2]} rotation={[THREE.MathUtils.degToRad(5), 0, THREE.MathUtils.degToRad(2)]}>
         <RoundedBox args={[0.95, 0.15, 1.6]} radius={0.05} smoothness={4}>
-          <meshPhysicalMaterial
-            {...buttonMaterialBase}
-            // 点击时发光
-            emissive={mouseButtons.left ? THEME.accentCyan : "#000"}
-            emissiveIntensity={mouseButtons.left ? 0.8 : 0}
-          />
+          <meshPhysicalMaterial {...buttonMaterialBase} emissive={mouseButtons.left ? THEME.accentCyan : "#000"} emissiveIntensity={mouseButtons.left ? 0.8 : 0} />
         </RoundedBox>
       </group>
-
-      {/* 右键 */}
       <group position={[0.55, 0.45, -1.2]} rotation={[THREE.MathUtils.degToRad(5), 0, THREE.MathUtils.degToRad(-2)]}>
         <RoundedBox args={[0.95, 0.15, 1.6]} radius={0.05} smoothness={4}>
-           <meshPhysicalMaterial
-            {...buttonMaterialBase}
-            emissive={mouseButtons.right ? THEME.accentCyan : "#000"}
-            emissiveIntensity={mouseButtons.right ? 0.8 : 0}
-          />
+           <meshPhysicalMaterial {...buttonMaterialBase} emissive={mouseButtons.right ? THEME.accentCyan : "#000"} emissiveIntensity={mouseButtons.right ? 0.8 : 0} />
         </RoundedBox>
       </group>
-
-      {/* === 3. 滚轮 (更精细) === */}
       <group position={[0, 0.45, -1.1]} rotation={[Math.PI / 2, 0, 0]}>
-        {/* 滚轮主体 */}
         <Cylinder args={[0.18, 0.18, 0.35, 32]}>
-          <meshStandardMaterial
-            color={THEME.mouseGrip}
-            roughness={0.9}
-            // 滚动时发光
-            emissive={scrollDir ? THEME.accentCyan : "#000"}
-            emissiveIntensity={scrollDir ? 2 : 0}
-          />
+          <meshStandardMaterial color={THEME.mouseGrip} roughness={0.9} emissive={scrollDir ? THEME.accentCyan : "#000"} emissiveIntensity={scrollDir ? 2 : 0} />
         </Cylinder>
-        {/* 滚轮中间的装饰环 */}
         <Cylinder args={[0.19, 0.19, 0.1, 32]} position={[0,0,0]}>
              <meshStandardMaterial color="#333" metalness={0.8} roughness={0.2} />
         </Cylinder>
       </group>
-
-      {/* 底部装饰光 (可选) */}
       <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.4, 0]}>
         <planeGeometry args={[2.5, 4]} />
         <meshBasicMaterial color={THEME.accentCyan} transparent opacity={0.15} toneMapped={false} />
       </mesh>
-
     </group>
   )
 }
 
-
-// --- 4. 主场景 ---
+// --- 4. 主场景 (保持不变) ---
 const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
   return (
     <>
       <color attach="background" args={[THEME.bg]} />
       <Suspense fallback={null} />
 
-      {/* 灯光调整：增加侧面光以强调新鼠标的轮廓 */}
       <ambientLight intensity={0.3} color={"#556677"} />
       <spotLight position={[-20, 25, 15]} angle={0.3} penumbra={1} intensity={150} color={THEME.accentCyan} castShadow />
       <pointLight position={[25, 10, 5]} intensity={100} color={THEME.accentMagenta} distance={60} />
       <rectAreaLight width={30} height={30} intensity={8} color={"#ffffff"} position={[0, 15, 5]} rotation={[-Math.PI/2, 0,0]} />
 
       <group rotation={[0.2, 0, 0]} position={[0, -0.8, 0]}>
-        {/* 使用新的全尺寸键盘 */}
         <KeyboardLayout activeKeys={activeKeys} />
-        {/* 使用新的写实鼠标 */}
         <RealisticMouse mouseButtons={mouseButtons} scrollDir={scrollDir} />
       </group>
 
-      {/* 地板和网格相应扩大 */}
       <Grid
         position={[0, -2.8, 0]}
-        args={[80, 60]} // 扩大尺寸
+        args={[80, 60]} 
         cellSize={1.1}
         cellThickness={1}
         cellColor={THEME.accentCyan}
@@ -322,13 +267,12 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
         <meshStandardMaterial color="#050505" roughness={0.2} metalness={0.9} envMapIntensity={0.3} />
       </mesh>
 
-      {/* 相机调整：拉远距离以容纳更大的场景 */}
       <PerspectiveCamera makeDefault position={[0, 16, 24]} fov={50} />
       <OrbitControls
-        enablePan={true} // 允许平移以便查看键盘两侧
+        enablePan={true} 
         maxPolarAngle={Math.PI / 2.1}
         minPolarAngle={Math.PI / 6}
-        maxDistance={45} // 增加最大缩放距离
+        maxDistance={45} 
         minDistance={10}
         autoRotate={false}
       />
@@ -376,12 +320,12 @@ const UIOverlay = ({ mousePos, keyHistory, activeKeys }) => {
       </div>
 
       <div style={{ marginBottom: '15px' }}>
-        <div style={{ color: THEME.accentMagenta, marginBottom: '5px', fontSize:'10px' }}>// ACTIVE_INPUTS</div>
+        <div style={{ color: THEME.accentMagenta, marginBottom: '5px', fontSize:'10px' }}>// ACTIVE_INPUTS (RAW CODE)</div>
         <div style={{ minHeight: '30px', display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
           {activeKeys.size > 0 ? Array.from(activeKeys).map(k => (
             <span key={k} style={{
-              background: THEME.accentCyan, color: '#000', padding: '2px 8px', borderRadius: '2px', fontWeight: 'bold', boxShadow: `0 0 10px ${THEME.accentCyan}`
-            }}>{k}</span>
+              background: THEME.accentCyan, color: '#000', padding: '2px 8px', borderRadius: '2px', fontWeight: 'bold', boxShadow: `0 0 10px ${THEME.accentCyan}`, fontSize: '12px'
+            }}>{k.replace('Key', '').replace('Digit', '')}</span>
           )) : <span style={{ color: '#005555' }}>STANDBY...</span>}
         </div>
       </div>
@@ -400,7 +344,7 @@ const UIOverlay = ({ mousePos, keyHistory, activeKeys }) => {
   )
 }
 
-// --- 6. App 入口 (新增了数字小键盘的映射) ---
+// --- 6. App 入口 (保持不变) ---
 export default function App() {
   const [activeKeys, setActiveKeys] = useState(new Set());
   const [mouseButtons, setMouseButtons] = useState({ left: false, right: false, mid: false });
@@ -408,42 +352,21 @@ export default function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [keyHistory, setKeyHistory] = useState([]);
 
-  const mapKey = (code, key) => {
-    // [修改] 增加数字键盘和方向键的映射
-    const specialized = {
-      'Space': 'SPACE', 'ControlLeft': 'CTRL', 'ControlRight': 'CTRL',
-      'ShiftLeft': 'SHIFT', 'ShiftRight': 'SHIFT', 'AltLeft': 'ALT', 'AltRight': 'ALT',
-      'Enter': 'ENTER', 'Backspace': 'BACKSPACE', 'Tab': 'TAB',
-      'CapsLock': 'CAPS', 'MetaLeft': 'WIN', 'MetaRight': 'WIN',
-      'Escape': 'ESC',
-      // 方向键
-      'ArrowUp': '↑', 'ArrowDown': '↓', 'ArrowLeft': '←', 'ArrowRight': '→',
-      // 功能键
-      'Insert': 'INS', 'Delete': 'DEL', 'Home': 'HOME', 'End': 'END', 'PageUp': 'PGUP', 'PageDown': 'PGDN',
-      // 数字小键盘
-      'Numpad0': '0', 'Numpad1': '1', 'Numpad2': '2', 'Numpad3': '3', 'Numpad4': '4',
-      'Numpad5': '5', 'Numpad6': '6', 'Numpad7': '7', 'Numpad8': '8', 'Numpad9': '9',
-      'NumpadAdd': '+', 'NumpadSubtract': '-', 'NumpadMultiply': '*', 'NumpadDivide': '/',
-      'NumpadEnter': 'ENT', 'NumpadDecimal': '.', 'NumLock': 'NUM'
-    };
-    // 对于普通字符，取大写；对于特殊键，取映射值
-    return specialized[code] || (key.length === 1 ? key.toUpperCase() : null);
-  };
-
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // 阻止 Tab 和 Alt 的默认行为，防止焦点切走
+      // 阻止默认行为（防止 Tab 切走，Alt 激活菜单）
       if (e.code === 'Tab' || e.key === 'Alt') e.preventDefault();
       
-      const mappedKey = mapKey(e.code, e.key);
-      if (!mappedKey) return;
-      setActiveKeys((prev) => new Set(prev).add(mappedKey));
-      setKeyHistory(prev => [mappedKey, ...prev].slice(8));
+      const code = e.code;
+      setActiveKeys((prev) => new Set(prev).add(code));
+      setKeyHistory(prev => [code, ...prev].slice(0, 8));
     };
+
     const handleKeyUp = (e) => {
-      const mappedKey = mapKey(e.code, e.key);
-      if (mappedKey) setActiveKeys((prev) => { const next = new Set(prev); next.delete(mappedKey); return next; });
+      const code = e.code;
+      setActiveKeys((prev) => { const next = new Set(prev); next.delete(code); return next; });
     };
+
     const handleMouseDown = (e) => {
       if(e.button === 0) setMouseButtons(p => ({...p, left: true}));
       if(e.button === 1) setMouseButtons(p => ({...p, mid: true}));
@@ -466,7 +389,6 @@ export default function App() {
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel);
     window.addEventListener('mousemove', handleMouseMove);
-    // 阻止右键菜单
     window.addEventListener('contextmenu', e => e.preventDefault());
 
     return () => {
