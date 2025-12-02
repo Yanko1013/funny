@@ -117,33 +117,57 @@ const KeyboardLayout = ({ activeKeys }) => {
   );
 };
 
-// --- 3. 鼠标 3D 组件 (增加跟随移动) ---
+// --- 3. 鼠标 3D 组件 (终极版：射线追踪跟随) ---
 const Mouse3D = ({ mouseButtons, scrollDir }) => {
   const groupRef = useRef();
-  const { viewport, pointer } = useThree(); // 获取 R3F 的鼠标状态
+  const { camera, raycaster, pointer } = useThree();
+  
+  // 定义一个虚拟的水平面 (法向量朝上 y=1, 高度为 0)
+  // 这就是鼠标滑动的“桌面”
+  const floorPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const intersectPoint = useMemo(() => new THREE.Vector3(), []);
 
-  useFrame((state) => {
+  useFrame(() => {
      if (groupRef.current) {
-        // 将屏幕鼠标位置 (-1 到 1) 映射到 3D 空间
-        // x * 5 和 y * 3 是移动范围系数，你可以调整灵敏度
-        const targetX = 6 + (pointer.x * 2); 
-        const targetZ = 2 + (-pointer.y * 2); 
+        // 1. 从摄像机向鼠标位置发射射线
+        raycaster.setFromCamera(pointer, camera);
+
+        // 2. 计算射线与“桌面”的交点
+        // 结果会直接存入 intersectPoint 中
+        raycaster.ray.intersectPlane(floorPlane, intersectPoint);
+
+        // 3. 坐标系修正 (关键步骤！)
+        // 因为 Mouse3D 被放在了一个旋转过的父级 Group 里
+        // 我们需要把计算出的“世界坐标”转换成 Group 内部的“局部坐标”
+        if (groupRef.current.parent) {
+            groupRef.current.parent.worldToLocal(intersectPoint);
+        }
+
+        // 4. 更新位置
+        // 使用 lerp 0.5 让跟随非常紧手，但保留极其细微的惯性，更有质感
+        // 如果想要绝对的一比一同步，把 0.5 改成 1.0
+        groupRef.current.position.lerp(intersectPoint, 0.5);
         
-        groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, targetX, 0.1);
-        groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, 0.1);
+        // 5. 稍微修正一下 Z 轴高度，防止模型穿模或者悬空
+        // 因为转换后 y 可能会变，强制让它贴在局部坐标的平面上
+        groupRef.current.position.y = 0.2; 
+
+        // 6. 简单的倾斜动态效果
+        groupRef.current.rotation.y = -pointer.x * 0.3;
+        groupRef.current.rotation.z = -pointer.x * 0.1;
      }
   });
 
   return (
     <group ref={groupRef} position={[6, 0, 2]}> 
-      {/* 鼠标外壳 */}
-      <RoundedBox args={[1.8, 0.5, 3]} radius={0.3} smoothness={4} position={[0, 0, 0]}>
+      {/* 鼠标主体 */}
+      <RoundedBox args={[1.8, 0.5, 3]} radius={0.3} smoothness={4}>
          <meshStandardMaterial color="#111" roughness={0.2} metalness={0.8} />
       </RoundedBox>
       
-      {/* 底部发光带 */}
-      <RoundedBox args={[1.9, 0.1, 3.1]} radius={0.3} position={[0, -0.25, 0]}>
-         <meshStandardMaterial color="#000" emissive={COLORS.neon} emissiveIntensity={0.5} />
+      {/* 底部发光带 (增加科技感) */}
+      <RoundedBox args={[1.9, 0.05, 3.1]} radius={0.3} position={[0, -0.25, 0]}>
+         <meshStandardMaterial color="#000" emissive={COLORS.neon} emissiveIntensity={0.8} />
       </RoundedBox>
 
       {/* 左键 */}
