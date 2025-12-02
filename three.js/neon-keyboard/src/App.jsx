@@ -356,7 +356,7 @@ export default function App() {
     const handleKeyDown = (e) => {
       // 阻止默认行为（防止 Tab 切走，Alt 激活菜单）
       if (e.code === 'Tab' || e.key === 'Alt') e.preventDefault();
-      
+      if (e.repeat) return;
       const code = e.code;
       setActiveKeys((prev) => new Set(prev).add(code));
       setKeyHistory(prev => [code, ...prev].slice(0, 8));
