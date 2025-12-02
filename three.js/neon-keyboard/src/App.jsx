@@ -53,7 +53,6 @@ const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
         position={[0, active ? 0.27 : 0.41, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.3}
-        font="/fonts/OPPOSans-Regular.ttf"
         color={active ? THEME.keyTextActive : THEME.keyTextBase}
         anchorX="center"
         anchorY="middle"
@@ -301,7 +300,7 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
 const UIOverlay = ({ mousePos, keyHistory, activeKeys }) => {
   return (
     <div style={{
-      position: 'absolute', right: 30, top: 30, zIndex: 10, width: '280px',
+      position: 'absolute', right: 40, top: 40, zIndex: 10, width: '280px',
       padding: '20px', background: 'rgba(0, 10, 20, 0.85)',
       border: `1px solid ${THEME.accentCyan}`,
       borderRadius: '8px',
@@ -403,7 +402,7 @@ export default function App() {
   }, []);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: THEME.bg, overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '80vh', background: THEME.bg, overflow: 'hidden' }}>
       <UIOverlay mousePos={mousePos} keyHistory={keyHistory} activeKeys={activeKeys} />
       <Canvas shadows dpr={[1, 2]} gl={{ antialias: false }}>
         <Scene activeKeys={activeKeys} mouseButtons={mouseButtons} scrollDir={scrollDir} />
