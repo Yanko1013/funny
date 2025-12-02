@@ -10,10 +10,15 @@ import { Suspense } from 'react';
 const THEME = {
   bg: "#000509", 
   keyBase: "#111111", 
-  keyActive: "#00FFFF", 
-  // 文字颜色微调：稍微暗一点点，避免未激活时也被 Bloom 算作高光
+
+  // 激活时的键帽颜色 (亮青色)
+  keyActive: "#76b9b9", 
+
   keyTextBase: "#88CCCC", 
-  keyTextActive: "#FFFFFF", 
+  
+  // 激活时的文字颜色 (黑色，配合亮青色键帽形成剪影效果)
+  keyTextActive: "#000509", 
+
   accentMagenta: "#FF00FF", 
   accentCyan: "#00FFFF", 
 };
@@ -21,6 +26,7 @@ const THEME = {
 // --- 1. 单个按键组件 ---
 const Key3D = ({ label, width = 1, x, z, active }) => {
   const meshRef = useRef();
+  // 目标位置：按下时下沉到 -0.15
   const targetY = active ? -0.15 : 0;
 
   useFrame(() => {
@@ -43,13 +49,17 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
         />
       </RoundedBox>
 
-      {/* 优化文字清晰度：
-         1. 去掉 outline (描边有时会降低小字体的清晰度)
-         2. fontSize 保持适中
-         3. 确保文字位于按键正上方一点点，避免 Z-fighting
+      {/* 修改重点 2：修正文字坐标
+          
+          计算逻辑：
+          - 键帽高度 0.8，中心在 0，顶部表面在 +0.4。
+          - 默认状态：键帽在 0，文字在 0.41 (浮在表面)。
+          - 激活状态：键帽下沉到 -0.15，顶部表面变为 (-0.15 + 0.4) = 0.25。
+          - 之前的错误值：-0.04 (导致文字陷进键帽里)。
+          - 修正后的值：0.26 (确保文字依然浮在键帽表面)。
       */}
       <Text
-        position={[0, active ? -0.04 : 0.41, 0]}
+        position={[0, active ? 0.26 : 0.41, 0]} 
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.3}
         font="/fonts/OPPOSans-Regular.ttf"
@@ -60,17 +70,13 @@ const Key3D = ({ label, width = 1, x, z, active }) => {
         {label}
       </Text>
 
-      {active && (
-        <mesh rotation={[-Math.PI/2, 0, 0]} position={[0, -0.3, 0]}>
-          <planeGeometry args={[width*1.2, 1.2]} />
-          <meshBasicMaterial color={THEME.keyActive} transparent opacity={0.3} toneMapped={false} />
-        </mesh>
-      )}
+      {/* 修改重点 1：已经删除了底部的 mesh (正方形高亮提示) */}
+      
     </group>
   );
 };
 
-// --- 2. 键盘布局生成器 (已移除霓虹灯带) ---
+// --- 2. 键盘布局生成器 ---
 const KeyboardLayout = ({ activeKeys }) => {
   const rows = [
     [{ k: '`', w: 1 }, { k: '1', w: 1 }, { k: '2', w: 1 }, { k: '3', w: 1 }, { k: '4', w: 1 }, { k: '5', w: 1 }, { k: '6', w: 1 }, { k: '7', w: 1 }, { k: '8', w: 1 }, { k: '9', w: 1 }, { k: '0', w: 1 }, { k: '-', w: 1 }, { k: '=', w: 1 }, { k: 'BACKSPACE', w: 2 }],
@@ -213,14 +219,7 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
         autoRotateSpeed={0.5}
       />
 
-      {/* 后期处理优化：解决文字模糊的关键点 
-          multisampling={4} : 开启多重采样抗锯齿
-      */}
       <EffectComposer disableNormalPass multisampling={4}>
-        {/* Bloom: 
-           luminanceThreshold={0.8} -> 只有非常亮(>0.8)的区域才发光。
-           这会确保普通白字不会产生光晕，只有按下的按键(emissiveIntensity高)才会发光。
-        */}
         <Bloom
           luminanceThreshold={0.8}
           mipmapBlur
@@ -228,26 +227,19 @@ const Scene = ({ activeKeys, mouseButtons, scrollDir }) => {
           radius={0.5}
           levels={8}
         />
-        
-        {/* ChromaticAberration (色散):
-           offset={[0.0002, 0.0002]} -> 将偏移量改到极小。
-           之前的 0.002 导致了明显的重影模糊。现在这个数值保留一点点质感，但几乎不影响清晰度。
-           如果不想要任何重影，可以把这个组件完全删掉。
-        */}
         <ChromaticAberration
           blendFunction={BlendFunction.NORMAL}
           offset={[0.0002, 0.0002]} 
           radialModulation={false}
           modulationOffset={0}
         />
-        
         <Vignette eskil={false} offset={0.3} darkness={0.7} />
       </EffectComposer>
     </>
   );
 };
 
-// --- 5. UI 面板组件 ---
+// --- 5. UI 面板组件 (保持不变) ---
 const UIOverlay = ({ mousePos, keyHistory, activeKeys }) => {
   return (
     <div style={{
@@ -361,7 +353,6 @@ export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', background: THEME.bg, overflow: 'hidden' }}>
       <UIOverlay mousePos={mousePos} keyHistory={keyHistory} activeKeys={activeKeys} />
-      {/* dpr 设置高一些，有助于文字清晰度 */}
       <Canvas shadows dpr={[1, 2]} gl={{ antialias: false }}>
         <Scene activeKeys={activeKeys} mouseButtons={mouseButtons} scrollDir={scrollDir} />
       </Canvas>
