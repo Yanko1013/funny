@@ -10,7 +10,6 @@ import { Suspense } from 'react';
 const THEME = {
   bg: "#000509", 
   keyBase: "#111111", 
-  // [修改] 稍微提亮一点激活色，配合高强度发光
   keyActive: "#00AAAA", 
   keyTextBase: "#88CCCC", 
   keyTextActive: "#FFFFFF", 
@@ -20,7 +19,7 @@ const THEME = {
   mouseGrip: "#0A0A0A",
 };
 
-// --- 1. 单个按键组件 ---
+// --- 1. 单个按键组件 (换回 Text 组件，但不设 font) ---
 const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
   const meshRef = useRef();
   const targetY = active ? -0.15 : 0;
@@ -40,7 +39,6 @@ const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
         <meshPhysicalMaterial
           color={active ? THEME.keyActive : THEME.keyBase}
           emissive={active ? THEME.keyActive : "#000000"}
-          // [修复] 提高发光强度，确保深色也能亮起来
           emissiveIntensity={active ? 3 : 0}
           roughness={0.3} 
           metalness={0.8}
@@ -49,13 +47,16 @@ const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
         />
       </RoundedBox>
 
+      {/* [修改] 恢复使用 Text 组件 */}
       <Text
         position={[0, active ? 0.27 : 0.41, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={0.3}
+        // [关键] 这里不传 font 属性，使用默认字体
         color={active ? THEME.keyTextActive : THEME.keyTextBase}
         anchorX="center"
         anchorY="middle"
+        // 确保文字发光且不被环境光影响
         material-toneMapped={false} 
       >
         {label}
@@ -65,10 +66,22 @@ const Key3D = ({ label, width = 1, h = 1, x, z, active }) => {
 };
 
 // =====================================================================
-// --- 2. 键盘布局生成器 (修复：找回了按键映射代码 c) ---
+// --- 2. 键盘布局生成器 (包含 F 行) ---
 // =====================================================================
 const KeyboardLayout = ({ activeKeys }) => {
   const rows = [
+    // Row -1: ESC 和 F1-F12 功能行
+    [
+      { k: 'ESC', c: 'Escape', w: 1 },
+      'sp-1', 
+      { k: 'F1', c: 'F1', w: 1 }, { k: 'F2', c: 'F2', w: 1 }, { k: 'F3', c: 'F3', w: 1 }, { k: 'F4', c: 'F4', w: 1 },
+      'sp-0.5',
+      { k: 'F5', c: 'F5', w: 1 }, { k: 'F6', c: 'F6', w: 1 }, { k: 'F7', c: 'F7', w: 1 }, { k: 'F8', c: 'F8', w: 1 },
+      'sp-0.5',
+      { k: 'F9', c: 'F9', w: 1 }, { k: 'F10', c: 'F10', w: 1 }, { k: 'F11', c: 'F11', w: 1 }, { k: 'F12', c: 'F12', w: 1 },
+      'sp-0.5',
+      { k: 'PS', c: 'PrintScreen', w: 1 }, { k: 'SL', c: 'ScrollLock', w: 1 }, { k: 'PB', c: 'Pause', w: 1 }
+    ],
     // Row 0
     [
       { k: '`', c: 'Backquote', w: 1 }, { k: '1', c: 'Digit1', w: 1 }, { k: '2', c: 'Digit2', w: 1 }, { k: '3', c: 'Digit3', w: 1 }, { k: '4', c: 'Digit4', w: 1 }, { k: '5', c: 'Digit5', w: 1 }, { k: '6', c: 'Digit6', w: 1 }, { k: '7', c: 'Digit7', w: 1 }, { k: '8', c: 'Digit8', w: 1 }, { k: '9', c: 'Digit9', w: 1 }, { k: '0', c: 'Digit0', w: 1 }, { k: '-', c: 'Minus', w: 1 }, { k: '=', c: 'Equal', w: 1 }, { k: 'BACK', c: 'Backspace', w: 2 },
@@ -79,25 +92,24 @@ const KeyboardLayout = ({ activeKeys }) => {
     ],
     // Row 1
     [
-      { k: 'TAB', c: 'Tab', w: 1.5 }, { k: 'Q', c: 'KeyQ', w: 1 }, { k: 'W', c: 'KeyW', w: 1 }, { k: 'E', c: 'KeyE', w: 1 }, { k: 'R', c: 'KeyR', w: 1 }, { k: 'T', c: 'KeyT', w: 1 }, { k: 'Y', c: 'KeyY', w: 1 }, { k: 'U', c: 'KeyU', w: 1 }, { k: 'I', c: 'KeyI', w: 1 }, { k: 'O', c: 'KeyO', w: 1 }, { k: 'P', c: 'KeyP', w: 1 }, { k: '[', c: 'BracketLeft', w: 1 }, { k: ']', c: 'BracketRight', w: 1 }, { k: '\\', c: 'Backslash', w: 1.5 },
+      { k: 'Tab', c: 'Tab', w: 1.5 }, { k: 'Q', c: 'KeyQ', w: 1 }, { k: 'W', c: 'KeyW', w: 1 }, { k: 'E', c: 'KeyE', w: 1 }, { k: 'R', c: 'KeyR', w: 1 }, { k: 'T', c: 'KeyT', w: 1 }, { k: 'Y', c: 'KeyY', w: 1 }, { k: 'U', c: 'KeyU', w: 1 }, { k: 'I', c: 'KeyI', w: 1 }, { k: 'O', c: 'KeyO', w: 1 }, { k: 'P', c: 'KeyP', w: 1 }, { k: '[', c: 'BracketLeft', w: 1 }, { k: ']', c: 'BracketRight', w: 1 }, { k: '\\', c: 'Backslash', w: 1.5 },
       'sp-0.5',
       { k: 'DEL', c: 'Delete', w: 1 }, { k: 'END', c: 'End', w: 1 }, { k: 'PGDN', c: 'PageDown', w: 1 },
       'sp-0.5',
       { k: '7', c: 'Numpad7', w: 1 }, { k: '8', c: 'Numpad8', w: 1 }, { k: '9', c: 'Numpad9', w: 1 }, 
-      // 跨两行的加号
       { k: '+', c: 'NumpadAdd', w: 1, h: 2 } 
     ],
     // Row 2
     [
-      { k: 'CAPS', c: 'CapsLock', w: 1.8 }, { k: 'A', c: 'KeyA', w: 1 }, { k: 'S', c: 'KeyS', w: 1 }, { k: 'D', c: 'KeyD', w: 1 }, { k: 'F', c: 'KeyF', w: 1 }, { k: 'G', c: 'KeyG', w: 1 }, { k: 'H', c: 'KeyH', w: 1 }, { k: 'J', c: 'KeyJ', w: 1 }, { k: 'K', c: 'KeyK', w: 1 }, { k: 'L', c: 'KeyL', w: 1 }, { k: ';', c: 'Semicolon', w: 1 }, { k: "'", c: 'Quote', w: 1 }, { k: 'ENTER', c: 'Enter', w: 2.2 },
+      { k: 'CapsL', c: 'CapsLock', w: 1.8 }, { k: 'A', c: 'KeyA', w: 1 }, { k: 'S', c: 'KeyS', w: 1 }, { k: 'D', c: 'KeyD', w: 1 }, { k: 'F', c: 'KeyF', w: 1 }, { k: 'G', c: 'KeyG', w: 1 }, { k: 'H', c: 'KeyH', w: 1 }, { k: 'J', c: 'KeyJ', w: 1 }, { k: 'K', c: 'KeyK', w: 1 }, { k: 'L', c: 'KeyL', w: 1 }, { k: ';', c: 'Semicolon', w: 1 }, { k: "'", c: 'Quote', w: 1 }, { k: 'Enter', c: 'Enter', w: 2.2 },
       'sp-4.4', 
       { k: '4', c: 'Numpad4', w: 1 }, { k: '5', c: 'Numpad5', w: 1 }, { k: '6', c: 'Numpad6', w: 1 }
     ],
     // Row 3
     [
-      { k: 'SHIFT', c: 'ShiftLeft', w: 2.3 }, { k: 'Z', c: 'KeyZ', w: 1 }, { k: 'X', c: 'KeyX', w: 1 }, { k: 'C', c: 'KeyC', w: 1 }, { k: 'V', c: 'KeyV', w: 1 }, { k: 'B', c: 'KeyB', w: 1 }, { k: 'N', c: 'KeyN', w: 1 }, { k: 'M', c: 'KeyM', w: 1 }, { k: ',', c: 'Comma', w: 1 }, { k: '.', c: 'Period', w: 1 }, { k: '/', c: 'Slash', w: 1 }, { k: 'SHIFT', c: 'ShiftRight', w: 2.7 },
+      { k: 'Shift', c: 'ShiftLeft', w: 2.3 }, { k: 'Z', c: 'KeyZ', w: 1 }, { k: 'X', c: 'KeyX', w: 1 }, { k: 'C', c: 'KeyC', w: 1 }, { k: 'V', c: 'KeyV', w: 1 }, { k: 'B', c: 'KeyB', w: 1 }, { k: 'N', c: 'KeyN', w: 1 }, { k: 'M', c: 'KeyM', w: 1 }, { k: ',', c: 'Comma', w: 1 }, { k: '.', c: 'Period', w: 1 }, { k: '/', c: 'Slash', w: 1 }, { k: 'Shift', c: 'ShiftRight', w: 2.7 },
       'sp-1.75',
-      { k: '↑', c: 'ArrowUp', w: 1 },
+      { k: '⬆️', c: 'ArrowUp', w: 1 },
       'sp-1.70',
       { k: '1', c: 'Numpad1', w: 1 }, { k: '2', c: 'Numpad2', w: 1 }, { k: '3', c: 'Numpad3', w: 1 }, 
       // 跨两行的回车
@@ -105,9 +117,9 @@ const KeyboardLayout = ({ activeKeys }) => {
     ],
     // Row 4
     [
-      { k: 'CTRL', c: 'ControlLeft', w: 1.5 }, { k: 'WIN', c: 'MetaLeft', w: 1 }, { k: 'ALT', c: 'AltLeft', w: 1.5 }, { k: 'SPACE', c: 'Space', w: 6 }, { k: 'ALT', c: 'AltRight', w: 1.5 }, { k: 'FN', c: 'ContextMenu', w: 1 }, { k: 'CTRL', c: 'ControlRight', w: 2 },
-      'sp-1.65',
-      { k: '←', c: 'ArrowLeft', w: 1 }, { k: '↓', c: 'ArrowDown', w: 1 }, { k: '→', c: 'ArrowRight', w: 1 },
+      { k: 'Ctrl', c: 'ControlLeft', w: 1.5 }, { k: 'Fn', c: 'FnKey', w: 1 }, { k: 'Win/Cmd', c: 'MetaLeft', w: 1.5 }, { k: 'Alt/Opt', c: 'AltLeft', w: 1.5 }, { k: 'SPACE', c: 'Space', w: 5.5 }, { k: 'Alt/Opt', c: 'AltRight', w: 1.5 }, { k: 'Menu', c: 'ContextMenu', w: 1 }, { k: 'Ctrl', c: 'ControlRight', w: 2 },
+      'sp-0.55',
+      { k: '⬅️', c: 'ArrowLeft', w: 1 }, { k: '⬇️', c: 'ArrowDown', w: 1 }, { k: '➡️', c: 'ArrowRight', w: 1 },
       'sp-0.6',
       { k: '0', c: 'Numpad0', w: 2.1 }, { k: '.', c: 'NumpadDecimal', w: 1 }
     ]
@@ -125,16 +137,13 @@ const KeyboardLayout = ({ activeKeys }) => {
           const spaceWidth = parseFloat(item.split('-')[1]);
           xOffset += spaceWidth;
         } else {
-          // 计算跨行中心偏移
           const height = item.h || 1;
           const zCenterAdjustment = (height - 1) * 1.1 / 2;
-
           keyElements.push({
             ...item,
             x: xOffset + item.w / 2,
             z: zOffset + zCenterAdjustment, 
             id: `key-${rowIndex}-${colIndex}`,
-            // [关键] 必须包含 code 属性，否则无法匹配 activeKeys
             code: item.c, 
             h: height 
           });
@@ -156,7 +165,6 @@ const KeyboardLayout = ({ activeKeys }) => {
             h={keyData.h}
             x={keyData.x} 
             z={keyData.z} 
-            // 依赖 code 进行判断
             active={activeKeys.has(keyData.code)} 
         />
       ))}
@@ -177,10 +185,8 @@ const RealisticMouse = ({ mouseButtons, scrollDir }) => {
       raycaster.setFromCamera(pointer, camera);
       raycaster.ray.intersectPlane(floorPlane, intersectPoint);
       if (groupRef.current.parent) groupRef.current.parent.worldToLocal(intersectPoint);
-      
       groupRef.current.position.lerp(intersectPoint, 0.15);
       groupRef.current.position.y = 0.35; 
-      
       const tiltX = pointer.y * 0.15; 
       const tiltZ = -pointer.x * 0.15; 
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, tiltX, 0.1);
@@ -348,7 +354,7 @@ export default function App() {
   const [activeKeys, setActiveKeys] = useState(new Set());
   const [mouseButtons, setMouseButtons] = useState({ left: false, right: false, mid: false });
   const [scrollDir, setScrollDir] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const [keyHistory, setKeyHistory] = useState([]);
 
   useEffect(() => {
@@ -360,12 +366,10 @@ export default function App() {
       setActiveKeys((prev) => new Set(prev).add(code));
       setKeyHistory(prev => [code, ...prev].slice(0, 8));
     };
-
     const handleKeyUp = (e) => {
       const code = e.code;
       setActiveKeys((prev) => { const next = new Set(prev); next.delete(code); return next; });
     };
-
     const handleMouseDown = (e) => {
       if(e.button === 0) setMouseButtons(p => ({...p, left: true}));
       if(e.button === 1) setMouseButtons(p => ({...p, mid: true}));
